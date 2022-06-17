@@ -1,0 +1,192 @@
+1) select substr('senthil.kumar@gmail.com',1,instr('senthil.kumar@gmail.com','@',1)-1) from dual;
+
+===================================================================================================
+
+2)select initcap('arunkumar ganeshen')from dual;
+=================================================================================================
+
+select substr('mahendira singh dohni',instr('mahendira singh dohni',' ',1,2))name from dual;
+
+
+
+===================================================================================================
+3)select round(months_between(sysdate,'11-may-92')/12) from dual;
+
+ROUND(MONTHS_BETWEEN(SYSDATE,'11-MAY-92')/12)
+---------------------------------------------
+                                           30
+
+select trunc(months_between(sysdate,'11-may-92')/12) from dual;
+
+TRUNC(MONTHS_BETWEEN(SYSDATE,'11-MAY-92')/12)
+---------------------------------------------
+                                           29
+
+same for experince...
+
+===================================================================================================
+
+to select department wise rank data
+------------------------------------
+ with e as (select department_id,salary,dense_rank() over (partition by department_id order by salary desc) rn from employees)
+ select * from e
+ where rn=2;
+
+
+using dense rank
+--------------------
+select first_name,salary,department_id 
+from   (select first_name,salary,department_id,dense_rank()over(partition by department_id order by salary desc) drnk 
+        from   employees)
+where drnk=2;
+===================================================================================================
+
+Write a program to print Nth Maximum salary?
+
+to select rank wise data
+-------------------------------
+with e as (select salary,dense_rank() over (order by salary desc) rn from employees)
+select * from e
+where rn=2;
+
+
+with e as (select first_name,salary,dense_rank() over (order by salary desc) rn from employees)
+select * from e
+where rn=&rank;
+
+select * 
+from   (select first_name,salary,department_id,dense_rank()over(order by salary desc) drnk 
+        from   employees)
+where drnk=2;
+===================================================================================================
+===================================================================================================
+how to get first and last day of this month
+
+select ((last_day(add_months(sysdate,-1))+1))||' '||last_day(sysdate) "first/last day" from dual;
+
+first/last day
+-------------------
+01-MAY-22 31-MAY-22
+
+
+select to_char(((last_day(add_months(sysdate,-1))+1)),'dd-mm-yy//day')
+||' '||to_char(last_day(sysdate),'dd-mm-yy//day') "first/last day" from dual;
+
+first/last day
+---------------------------------------
+01-05-22//sunday    31-05-22//tuesday
+
+===================================================================================================
+
+A column contains name like 'sasi5kumar'. Print sasi as first name and kumar as last name?
+
+SQL> select (select substr('senthil5kumar',1,instr('senthil5kumar','5',1)-1) from dual) "f_name"
+  2  ,(select substr('senthil5kumar',instr('senthil5kumar','5',1)+1) from dual) "l_name"
+  3  from dual;
+
+f_name  l_nam
+------- -----
+senthil kumar
+
+
+
+Group function syntax and how to find no.of duplicate records
+
+select count(*) from employees
+group by(first_name)
+having count(*)>1;
+
+
+
+how to get unique values:
+
+select distinct(first_name) from employees;
+
+
+
+how to get without duplicates record even duplicate also not came 
+
+select first_name,count(*) from employees
+   group by(first_name)
+   having count(*)=1;
+
+==================================================================================================
+
+How to print last 15 character of the string? 
+
+select substr('abcdefghijklmnopqrstuvwxz',-15) from dual;
+===================================================================================================
+
+Replace in CHENNAI for 1st N to A and 2nd N to B (for all words not only CHENNAI)? 
+
+
+======================================================================================================
+
+What is the maximum size of table name? 
+      30 Characters
+
+======================================================================================================
+What is maximum no. of columns we can use in a table?
+      1000 COLUMN
+
+=======================================================================================================
+IS it possible to create synonym for all objects. If yes, what are all the objects.
+
+Use the CREATE SYNONYM statement to create a synonym, 
+which is an alternative name for a table, view, sequence, procedure, stored function, package, materialized view, 
+Java class schema object, user-defined object type, or another synonym.
+
+================================================================================================================
+ WRITE PL/SQL block for copying datas from one table to another using BULK COLLECT & FORALL.
+
+declare
+type v_b_col is table of emp.first_name%type;
+v_a v_b_col:=v_b_col();
+v_t_s number;
+v_t_e number;
+begin
+select first_name bulk collect into v_a
+from emp;
+v_t_s:=dbms_utility.get_time();
+forall i in v_a.first..v_a.last
+insert into back_up values(v_a(i));
+v_t_e:=dbms_utility.get_time();
+dbms_output.put_line(v_t_e-v_t_s);
+end;
+/
+========================================================================================================================
+
+ write query for inserting some records in a table by using cursor.
+
+declare
+cursor c is select first_name from emp;
+v_a emp.first_name%type;
+begin
+open c;
+loop
+fetch c into v_a;
+exit when c%notfound;
+insert into back_up values(v_a);
+end loop;
+end;
+/
+
+ --In table t1, 10 records are available and 2 records are available in table t2. I wnat to insert only the other 8 records. Write the query for this.
+==========================================================================================================================
+
+create or replace function test_fn(v_a in varchar2,v_b in varchar2) return varchar2
+as
+v_c varchar2(30);
+v_d varchar2(20);
+pragma autonomous_transaction;
+begin
+select salary into v_c from emp
+where employee_id=v_a;
+v_d:=v_b+v_c;
+update emp set salary=v_d
+where employee_id=v_a;
+commit;
+return v_d;
+end;
+
+==============================================================================================================================================
